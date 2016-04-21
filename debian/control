@@ -1,4 +1,4 @@
-Source: peg
+Source: peg-go
 Section: mail
 Priority: optional
 Maintainer: Mogilko Alexander <mogilko@corp.sputnik.ru>
@@ -10,7 +10,7 @@ Homepage: https://github.com/CMogilko/peg
 Vcs-Git: https://github.com/CMogilko/peg
 Vcs-Browser: https://github.com/CMogilko/peg
 
-Package: peg
+Package: peg-go
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: go peg parser generator
