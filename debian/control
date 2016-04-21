@@ -1,0 +1,17 @@
+Source: peg
+Section: mail
+Priority: optional
+Maintainer: Mogilko Alexander <mogilko@corp.sputnik.ru>
+Build-Depends: debhelper (>= 9), dh-golang, cmake, 
+           mailpaas-libpaascommon-dev,
+           mailpaas-schema-dev
+Standards-Version: 3.9.5
+Homepage: https://github.com/CMogilko/peg
+Vcs-Git: https://github.com/CMogilko/peg
+Vcs-Browser: https://github.com/CMogilko/peg
+
+Package: peg
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: go peg parser generator
+ packrat peg parser generator for golang
