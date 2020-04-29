@@ -11,17 +11,18 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"time"
+
+	"github.com/pointlander/peg/tree"
 )
 
 var (
-	inline    = flag.Bool("inline", false, "parse rule inlining")
-	_switch   = flag.Bool("switch", false, "replace if-else if-else like blocks with switch blocks")
-	syntax    = flag.Bool("syntax", false, "print out the syntax tree")
-	highlight = flag.Bool("highlight", false, "test the syntax highlighter")
-	ast       = flag.Bool("ast", false, "generate an AST")
-	test      = flag.Bool("test", false, "test the PEG parser performance")
-	print     = flag.Bool("print", false, "directly dump the syntax tree")
+	inline   = flag.Bool("inline", false, "parse rule inlining")
+	_switch  = flag.Bool("switch", false, "replace if-else if-else like blocks with switch blocks")
+	print    = flag.Bool("print", false, "directly dump the syntax tree")
+	syntax   = flag.Bool("syntax", false, "print out the syntax tree")
+	noast    = flag.Bool("noast", false, "disable AST")
+	strict   = flag.Bool("strict", false, "treat compiler warnings as errors")
+	filename = flag.String("output", "", "specify name of output file")
 )
 
 func main() {
@@ -39,46 +40,33 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *test {
-		iterations, p := 1000, &Peg{Tree: New(*inline, *_switch), Buffer: string(buffer)}
-		p.Init()
-		start := time.Now()
-		for i := 0; i < iterations; i++ {
-			p.Parse()
-			p.Reset()
-		}
-		total := float64(time.Since(start).Nanoseconds()) / float64(1000)
-		fmt.Printf("time: %v us\n", total/float64(iterations))
-		return
-	}
-
-	p := &Peg{Tree: New(*inline, *_switch), Buffer: string(buffer), Pretty: true}
-	p.Init()
+	p := &Peg{Tree: tree.New(*inline, *_switch, *noast), Buffer: string(buffer)}
+	p.Init(Pretty(true), Size(1<<15))
 	if err := p.Parse(); err != nil {
 		log.Fatal(err)
 	}
 
 	p.Execute()
 
-	if *ast {
-		p.tokenTree.AST().Print(p.Buffer)
-	}
 	if *print {
 		p.Print()
 	}
 	if *syntax {
 		p.PrintSyntaxTree()
 	}
-	if *highlight {
-		p.Highlighter()
-	}
 
-	filename := file + ".go"
-	out, error := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if error != nil {
-		fmt.Printf("%v: %v\n", filename, error)
+	if *filename == "" {
+		*filename = file + ".go"
+	}
+	out, err := os.OpenFile(*filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Printf("%v: %v\n", *filename, err)
 		return
 	}
 	defer out.Close()
-	p.Compile(filename, out)
+
+	p.Strict = *strict
+	if err = p.Compile(*filename, os.Args, out); err != nil {
+		log.Fatal(err)
+	}
 }
