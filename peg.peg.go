@@ -4,7 +4,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/pointlander/peg/tree"
+	"github.com/CMogilko/peg/tree"
 	"io"
 	"os"
 	"sort"

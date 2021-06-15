@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/pointlander/peg/tree"
+	"github.com/CMogilko/peg/tree"
 )
 
 func TestCorrect(t *testing.T) {

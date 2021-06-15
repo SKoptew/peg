@@ -12,7 +12,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/pointlander/peg/tree"
+	"github.com/CMogilko/peg/tree"
 )
 
 var (
