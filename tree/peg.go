@@ -75,7 +75,7 @@ func (node *node32) print(w io.Writer, pretty bool, buffer string) {
 			if !pretty {
 				fmt.Fprintf(w, "%v %v\n", rule, quote)
 			} else {
-				fmt.Fprintf(w, "\x1B[34m%v\x1B[m %v\n", rule, quote)
+				fmt.Fprintf(w, "\x1B[36m%v\x1B[m %v\n", rule, quote)
 			}
 			if node.up != nil {
 				print(node.up, depth + 1)
@@ -221,11 +221,26 @@ func (e *parseError) Error() string {
 	}
 	for _, token := range tokens {
 		begin, end := int(token.begin), int(token.end)
-		err += fmt.Sprintf(format,
-                         rul3s[token.pegRule],
-                         translations[begin].line, translations[begin].symbol,
-                         translations[end].line, translations[end].symbol,
-                         strconv.Quote(string(e.p.buffer[begin:end])))
+
+		trBegin, ok := translations[begin]
+		if !ok {
+			return err + fmt.Sprint("internal parse error: translations[begin] not found")
+		}
+
+		trEnd, ok := translations[end]
+		if !ok {
+			return err + fmt.Sprint("internal parse error: translations[end] not found")
+		}
+
+		err += fmt.Sprintf(
+			format,
+			rul3s[token.pegRule],
+			trBegin.line,
+			trBegin.symbol,
+			trEnd.line,
+			trEnd.symbol,
+			strconv.Quote(string(e.p.buffer[begin:end])),
+		)
 	}
 
 	return err
@@ -258,6 +273,8 @@ func (p *{{.StructName}}) Execute() {
 		{{range .Actions}}case ruleAction{{.GetId}}:
 			{{.String}}
 		{{end}}
+		default:
+			// do nothing
 		}
 	}
 	_, _, _, _, _ = buffer, _buffer, text, begin, end
